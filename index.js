@@ -168,6 +168,8 @@ function buildPages() {
         let pagePath = path.join(__dirname,'pages',"page" + ("00" + pageIndex).slice(-3) + ".png");
         let params = ' ' + pageWidthPixels + ' ' + pageHeightPixels + ' "' + pagePath + '" "' + imageFile.fullFileName + '" ' + coords.topLeft.x + ' ' + coords.topLeft.y + ' ' + coords.bottomRight.x + ' ' + coords.bottomRight.y + ' "' + imageFile.formatedDate + ': ' + imageFile.imageName + '"';
         child_process.execSync(path.join(__dirname,'photo-book-dot-net','bin','Release','photo-book.exe') + params);
+
+        console.log(((i+1) / imageFiles.length * 100).toFixed(0) + "% complete on page " + (pageIndex));
     }
 }
 
