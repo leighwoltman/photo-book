@@ -137,13 +137,13 @@ namespace photo_book
 
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             g.DrawImage(image, destRect, srcRect, GraphicsUnit.Pixel);
-            using (Brush brush = new SolidBrush(Color.FromArgb(100, 0, 0, 0)))
+            using (Brush brush = new SolidBrush(Color.FromArgb(140, 0, 0, 0)))
             {
                 g.FillRectangle(brush, new Rectangle(topLeft.x, destRect.Y + destRect.Height - bannerHeight, slotWidth, bannerHeight));
             }
-            using (Font arialFont = new Font("Arial", (int)Math.Floor((double)bannerHeight/2)))
+            using (Font arialFont = new Font("Arial", (int)Math.Floor((double)bannerHeight/2.5)))
             {
-                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + 2, destRect.Y + destRect.Height - bannerHeight - 1));
+                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + 2, destRect.Y + destRect.Height - (int)(0.8 * bannerHeight)));
             }
         }
     }
