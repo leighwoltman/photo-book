@@ -1,4 +1,4 @@
-photo-book-nodejs
+photo-book
 =======
 
 scripts to make chronilogical photo book out of a directory of photos
