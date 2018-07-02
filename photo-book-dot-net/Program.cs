@@ -44,6 +44,13 @@ namespace photo_book
             // calculate the height of the text banner
             int bannerHeight = (int)Math.Floor((double)pageHeight / 40);
 
+            // decide if the bottomRight is within a couple pixels of the bottom of the page
+            bool topBanner = false;
+            if (bottomRight.y > (pageHeight - 3))
+            {
+                topBanner = true;
+            }
+
             // decide if the page file already exists
             if (File.Exists(pagePath))
             {
@@ -51,7 +58,7 @@ namespace photo_book
                 {
                     using (Graphics g = Graphics.FromImage(image))
                     {
-                        InsertImage(g, imagePath, topLeft, bottomRight, caption, bannerHeight);
+                        InsertImage(g, imagePath, topLeft, bottomRight, caption, bannerHeight, topBanner);
                     }
                     image.Save(pagePath.Replace(".png", "_edit.png"), System.Drawing.Imaging.ImageFormat.Jpeg);
                 }
@@ -68,14 +75,14 @@ namespace photo_book
                     Rectangle ImageSize = new Rectangle(0, 0, pageWidth, pageHeight);
                     g.FillRectangle(Brushes.Black, ImageSize);
 
-                    InsertImage(g, imagePath, topLeft, bottomRight, caption, bannerHeight);
+                    InsertImage(g, imagePath, topLeft, bottomRight, caption, bannerHeight, topBanner);
                 }
                 // save the image out
                 bmp.Save(pagePath, System.Drawing.Imaging.ImageFormat.Png);
             }
         }
 
-        static void InsertImage(Graphics g, string imagePath, point topLeft, point bottomRight, string caption, int bannerHeight)
+        static void InsertImage(Graphics g, string imagePath, point topLeft, point bottomRight, string caption, int bannerHeight, bool topBanner)
         {
             Image image = Image.FromFile(imagePath);
             int slotWidth = bottomRight.x - topLeft.x;
@@ -137,13 +144,18 @@ namespace photo_book
 
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             g.DrawImage(image, destRect, srcRect, GraphicsUnit.Pixel);
+            int bannerY = destRect.Y + destRect.Height - bannerHeight;
+            if(topBanner)
+            {
+                bannerY = destRect.Y;
+            }
             using (Brush brush = new SolidBrush(Color.FromArgb(140, 0, 0, 0)))
             {
-                g.FillRectangle(brush, new Rectangle(topLeft.x, destRect.Y + destRect.Height - bannerHeight, slotWidth, bannerHeight));
+                g.FillRectangle(brush, new Rectangle(topLeft.x, bannerY, slotWidth, bannerHeight));
             }
             using (Font arialFont = new Font("Arial", (int)Math.Floor((double)bannerHeight/2.5)))
             {
-                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + 2, destRect.Y + destRect.Height - (int)(0.8 * bannerHeight)));
+                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + 2, bannerY + (int)(0.2 * bannerHeight)));
             }
         }
     }
