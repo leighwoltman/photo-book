@@ -153,9 +153,9 @@ namespace photo_book
             {
                 g.FillRectangle(brush, new Rectangle(topLeft.x, bannerY, slotWidth, bannerHeight));
             }
-            using (Font arialFont = new Font("Arial", (int)Math.Floor((double)bannerHeight/2.5)))
+            using (Font arialFont = new Font("Arial", (int)Math.Floor(((double)bannerHeight)/3.5)))
             {
-                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + 2, bannerY + (int)(0.2 * bannerHeight)));
+                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + 2, bannerY + (int)(0.3 * bannerHeight)));
             }
         }
     }
