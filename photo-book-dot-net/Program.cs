@@ -155,7 +155,7 @@ namespace photo_book
             }
             using (Font arialFont = new Font("Arial", (int)Math.Floor(((double)bannerHeight)/3.5)))
             {
-                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + bannerHeight, bannerY + (int)(0.3 * bannerHeight)));
+                g.DrawString(caption, arialFont, Brushes.White, new Point(topLeft.x + (bannerHeight / 2), bannerY + (int)(0.3 * bannerHeight)));
             }
         }
     }
