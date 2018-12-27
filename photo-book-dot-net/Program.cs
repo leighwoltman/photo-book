@@ -73,7 +73,7 @@ namespace photo_book
                 using (Graphics g = Graphics.FromImage(bmp))
                 {
                     Rectangle ImageSize = new Rectangle(0, 0, pageWidth, pageHeight);
-                    g.FillRectangle(Brushes.Black, ImageSize);
+                    g.FillRectangle(Brushes.White, ImageSize);
 
                     InsertImage(g, imagePath, topLeft, bottomRight, caption, bannerHeight, topBanner);
                 }
