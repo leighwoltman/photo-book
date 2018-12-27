@@ -26,7 +26,7 @@ function getFileByExtension (srcpath, extension) {
     return retval;
 }
 
-var files = getFiles(path.join(__dirname,'images'));
+var files = getFiles(path.join(__dirname,'images','Export'));
 var imageFiles = [];
 
 var counter = 0;
@@ -36,44 +36,45 @@ function loopAgain() {
     {
         let img = files[counter];
 
-        calipers.measure(path.join(__dirname,'images',img)).then( 
+        calipers.measure(path.join(__dirname,'images','Export',img)).then( 
             (result) => {
                 try {
-                    new ExifImage({ image : path.join(__dirname,'images',img) }, function (error, exifData) {
+                    new ExifImage({ image : path.join(__dirname,'images','Export',img) }, function (error, exifData) {
                         
                         let tstamp = null;
                         let imageCaption = img.replace(/\.[^/.]+$/, "");
 
-                        if(exifData && exifData.exif && (exifData.exif.DateTimeOriginal || exifData.exif.DateTimeDigitized) ) 
-                        {
-                            var stringDate;
-                            if(exifData.exif.DateTimeOriginal) 
-                            {
-                                stringDate = exifData.exif.DateTimeOriginal;
-                            } 
-                            else 
-                            {
-                                stringDate = exifData.exif.DateTimeDigitized;
-                            }
+                        // can we extract it from the file name?
+                        var stringDate = imageCaption.substr(0, imageCaption.indexOf(' '));
 
-                            tstamp = moment(stringDate, "YYYY:MM:DD HH:mm:ss");
+                        tstamp = moment(stringDate, "YYYY-MM-DD");
+
+                        if( isNaN(tstamp) ) {
+                            tstamp = null;
+                            
+                        } else {
+                            // we want to have the caption just be the part after the date
+                            imageCaption = imageCaption.substr(imageCaption.indexOf(' ')+1);
                         }
-                        else
-                        {
-                            // can we extract it from the file name?
-                            var stringDate = imageCaption.substr(0, imageCaption.indexOf(' '));
 
-                            tstamp = moment(stringDate, "YYYY-MM-DD");
 
-                            if( isNaN(tstamp) ) {
-                                tstamp = null;
-                                // then we didn't find any date info on this file
-                                console.log("ERROR: Couldn't find any date info: " + img);
-                            } else {
-                                // we want to have the caption just be the part after the date
-                                imageCaption = imageCaption.substr(imageCaption.indexOf(' ')+1);
+                        if(!tstamp) {
+                            if(exifData && exifData.exif && (exifData.exif.DateTimeOriginal || exifData.exif.DateTimeDigitized) ) 
+                            {
+                                var stringDate;
+                                if(exifData.exif.DateTimeOriginal) 
+                                {
+                                    stringDate = exifData.exif.DateTimeOriginal;
+                                } 
+                                else 
+                                {
+                                    stringDate = exifData.exif.DateTimeDigitized;
+                                }
+
+                                tstamp = moment(stringDate, "YYYY:MM:DD HH:mm:ss");
                             }
                         }
+
 
                         if(tstamp)
                         {
@@ -81,12 +82,17 @@ function loopAgain() {
 
                             imageFiles.push({
                                 imageName: imageCaption,
-                                fullFileName: path.join(__dirname,'images',img),
+                                fullFileName: path.join(__dirname,'images','Export',img),
                                 height: result.pages[0].height,
                                 width: result.pages[0].width,
                                 timestamp: tstamp.toDate(),
                                 formatedDate: formatedDate
                             });
+                        }
+                        else
+                        {
+                            // then we didn't find any date info on this file
+                            console.log("ERROR: Couldn't find any date info: " + img);
                         }
 
                         counter++;
@@ -141,7 +147,7 @@ function buildPages() {
         if(slots.length == 0) 
         {
             // then populate with the default two slots
-            initializeSlots(slots, pageWidthPixels, pageHeightPixels);
+            initializeSlots(slots, pageWidthPixels, pageHeightPixels, (pageIndex % 2 == 0));
             pageIndex++;
         }
 
@@ -173,30 +179,42 @@ function buildPages() {
     }
 }
 
-function initializeSlots(slots, pageWidthPixels, pageHeightPixels) {
+function initializeSlots(slots, pageWidthPixels, pageHeightPixels, alignRight) {
     let result = {};
     result.topLeft = {};
     result.bottomRight = {};
 
-    result.topLeft.x = 150;
+    let alignmentMargin = 0; // 150 for double sided
+
+    result.topLeft.x = alignRight ? alignmentMargin : 0;
     result.topLeft.y = 0;
-    result.bottomRight.x = pageWidthPixels;
+    result.bottomRight.x = pageWidthPixels - (alignRight ? 0 : alignmentMargin);
     result.bottomRight.y = Math.ceil(pageHeightPixels/2);
     result.recursion = 0;
 
     slots.push(result);
 
+    // split this slot into two already
+    splitFirstSlot(slots);
+
     result = {};
     result.topLeft = {};
     result.bottomRight = {};
 
-    result.topLeft.x = 150;
+    result.topLeft.x = alignRight ? alignmentMargin : 0;
     result.topLeft.y = Math.ceil(pageHeightPixels/2);
-    result.bottomRight.x = pageWidthPixels;
+    result.bottomRight.x = pageWidthPixels - (alignRight ? 0 : alignmentMargin);
     result.bottomRight.y = pageHeightPixels;
     result.recursion = 0;
 
-    slots.push(result);
+    let secondSlots = [];
+    secondSlots.push(result);
+
+    splitFirstSlot(secondSlots);
+
+    // now push the second slots onto the first
+    slots.push(secondSlots[0]);
+    slots.push(secondSlots[1]);
 }
 
 function splitFirstSlot(slots) {
